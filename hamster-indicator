@@ -162,6 +162,12 @@ class HamsterIndicator(HamsterApplet):
         # Place the window near the mouse cursor
         self.window.set_position(gtk.WIN_POS_MOUSE)
 
+        # Do not skip the taskbar
+        self.window.set_skip_taskbar_hint(False)
+
+        # Do not skip the pager
+        self.window.set_skip_pager_hint(False)
+
 
     def on_new_activity_activated(self, *args):
         self.show_dialog()
