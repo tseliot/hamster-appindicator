@@ -87,6 +87,7 @@ class FakeApplet(object):
 class HamsterIndicator(HamsterApplet):
 
     def __init__(self, applet=None):
+        self._activity_as_attribute = None
         # Create a fake applet since HamsterApplet requires one
         applet = FakeApplet()
         
@@ -217,13 +218,28 @@ class HamsterIndicator(HamsterApplet):
 
     def update_label(self):
         '''Override for menu items sensitivity and to update the menu'''
-        if self.last_activity and self.last_activity['end_time'] is None:
+        if self.last_activity:
+            # Let's see if activity is an attribute and cache the result.
+            # This is only required for backwards compatibility
+            if self._activity_as_attribute == None:
+                self._activity_as_attribute = hasattr(self.last_activity,
+                                                      'activity')
+            if self._activity_as_attribute:
+                start_time = self.last_activity.start_time
+                end_time = self.last_activity.end_time
+                last_activity_name = self.last_activity.activity
+            else:
+                start_time = self.last_activity['start_time']
+                end_time = self.last_activity['end_time']
+                last_activity_name = self.last_activity['name']
+
+        if self.last_activity and end_time is None:
             self.stop_activity_item.set_sensitive(1)
-            delta = dt.datetime.now() - self.last_activity['start_time']
+            delta = dt.datetime.now() - start_time
             duration = delta.seconds /  60
-            label = "%s %s" % (self.last_activity['name'],
+            label = "%s %s" % (last_activity_name,
                                stuff.format_duration(duration, False))
-            self.set_activity_text(self.last_activity['name'],
+            self.set_activity_text(last_activity_name,
                                  stuff.format_duration(duration, False))
         else:
             self.stop_activity_item.set_sensitive(0)
