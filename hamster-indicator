@@ -41,7 +41,12 @@ import locale
 
 from hamster.configuration import conf, runtime, dialogs
 
-from hamster import stuff
+try:
+    from hamster import stuff
+    from hamster import i18n
+except ImportError:
+    from hamster.lib import stuff
+    from hamster.lib import i18n
 
 # controllers for other windows
 from hamster import widgets
@@ -281,14 +286,8 @@ class HamsterIndicator(HamsterApplet):
 
 
 if __name__ == "__main__":
-
-
-    from hamster import i18n
     i18n.setup_i18n()
-
     hamster_indicator = HamsterIndicator()
-
 #    ind.set_menu(hamster_indicator.menu)
-
 
     gtk.main()
