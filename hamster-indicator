@@ -92,11 +92,13 @@ class HamsterIndicator(HamsterApplet):
         applet = FakeApplet()
         
         self.indicator = appindicator.Indicator ("hamster-applet",
-                                  "hamster-applet",#"file-manager",
+                                  "hamster-applet-inactive",
                                   appindicator.CATEGORY_SYSTEM_SERVICES)
     #                              appindicator.CATEGORY_APPLICATION_STATUS)
+
+
         self.indicator.set_status (appindicator.STATUS_ACTIVE)
-    #    ind.set_attention_icon ("indicator-messages-new")
+        self.indicator.set_attention_icon('hamster-applet-active')
 
         self.activity, self.duration = None, None
         
@@ -234,7 +236,7 @@ class HamsterIndicator(HamsterApplet):
                 last_activity_name = self.last_activity['name']
 
         if self.last_activity and end_time is None:
-            self.stop_activity_item.set_sensitive(1)
+            self._set_activity_status(1)
             delta = dt.datetime.now() - start_time
             duration = delta.seconds /  60
             label = "%s %s" % (last_activity_name,
@@ -242,12 +244,21 @@ class HamsterIndicator(HamsterApplet):
             self.set_activity_text(last_activity_name,
                                  stuff.format_duration(duration, False))
         else:
-            self.stop_activity_item.set_sensitive(0)
+            self._set_activity_status(0)
             label = "%s" % _(u"New activity")#_(u"No activity")
             self.set_activity_text(label, None)
 
         # Update the menu or the new activity text won't show up
         self.refresh_menu()
+
+    def _set_activity_status(self, is_active):
+        if is_active:
+            # There's an active task
+            self.indicator.set_status (appindicator.STATUS_ATTENTION)
+        else:
+            # There's no active task
+            self.indicator.set_status (appindicator.STATUS_ACTIVE)
+        self.stop_activity_item.set_sensitive(is_active)
 
     def position_popup(self):
         '''Override the superclass method and do nothing'''
@@ -259,17 +270,17 @@ class HamsterIndicator(HamsterApplet):
 
     def set_last_activity(self):
         '''Override to change the Stop button sensitivity'''
-        #self.stop_activity_item.set_sensitive(self.last_activity != None)
+        #self._set_activity_status(self.last_activity != None)
         super(HamsterIndicator, self).set_last_activity()
 
     def on_stop_tracking_clicked(self, widget):
         '''Override to make the Stop button insensitive'''
-        self.stop_activity_item.set_sensitive(0)
+        self._set_activity_status(0)
         super(HamsterIndicator, self).on_stop_tracking_clicked(widget)
 
     def on_switch_activity_clicked(self, widget):
         '''Override to make the Stop button sensitive'''
-        self.stop_activity_item.set_sensitive(1)
+        self._set_activity_status(1)
         super(HamsterIndicator, self).on_switch_activity_clicked(widget)
 
     def set_activity_text(self, activity, duration):
