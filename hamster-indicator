@@ -109,6 +109,9 @@ class HamsterIndicator(HamsterApplet):
         # Set the attention icon as per the icon_glow gconf key
         self._set_attention_icon()
 
+        # Initialise the activity label
+        self.indicator.set_label(_(u"No activity"))
+
         self.activity, self.duration = None, None
 
         self.menu = gtk.Menu()
@@ -249,13 +252,25 @@ class HamsterIndicator(HamsterApplet):
                                stuff.format_duration(duration, False))
             self.set_activity_text(last_activity_name,
                                  stuff.format_duration(duration, False))
+            indicator_label = "%s %s" % (self._clamp_text(self.activity),
+                                         self.duration)
         else:
             self._set_activity_status(0)
             label = "%s" % _(u"New activity")#_(u"No activity")
             self.set_activity_text(label, None)
+            indicator_label = _(u"No activity")
+
+        self.indicator.set_label(indicator_label)
 
         # Update the menu or the new activity text won't show up
         self.refresh_menu()
+
+    def _clamp_text(self, text, length=25):
+        text = stuff.escape_pango(text)
+        if len(text) > length:  #ellipsize at some random length
+            #text = "%s%s" % (text[:25], "&#8230;")
+            text = "%s" % (text[:length])
+        return text
 
     def _set_activity_status(self, is_active):
         if is_active:
@@ -302,9 +317,10 @@ class HamsterIndicator(HamsterApplet):
 
     def set_activity_text(self, activity, duration):
         '''This adds a method which belongs to hamster.applet.PanelButton'''
-        activity = stuff.escape_pango(activity)
-        if len(activity) > 25:  #ellipsize at some random length
-            activity = "%s%s" % (activity[:25], "&#8230;")
+#        activity = stuff.escape_pango(activity)
+#        if len(activity) > 25:  #ellipsize at some random length
+#            activity = "%s%s" % (activity[:25], "&#8230;")
+        activity = self._clamp_text(activity)
 
         self.activity = activity
         self.duration = duration
