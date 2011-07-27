@@ -97,6 +97,16 @@ class HamsterIndicator(HamsterApplet):
         self._use_icon_glow = self._settings.get_bool(self._icon_glow_path)
         self._settings.notify_add(self._icon_glow_path, self._on_icon_glow_changed)
 
+        # Key to show/hide the indicator label
+        self._show_label_path = os.path.join(self.BASE_KEY, "show_label")
+        self._show_label = self._settings.get_bool(self._show_label_path)
+        self._settings.notify_add(self._show_label_path, self._on_show_label_changed)
+
+        # Key to set the length of indicator label
+        self._label_length_path = os.path.join(self.BASE_KEY, "label_length")
+        self._label_length = self._settings.get_int(self._label_length_path)
+        self._settings.notify_add(self._label_length_path, self._on_label_length_changed)
+
         self._activity_as_attribute = None
         # Create a fake applet since HamsterApplet requires one
         applet = FakeApplet()
@@ -110,7 +120,9 @@ class HamsterIndicator(HamsterApplet):
         self._set_attention_icon()
 
         # Initialise the activity label
-        self.indicator.set_label(_(u"No activity"))
+        self.indicator.set_label(self._clamp_text(_(u"No activity"),
+                                                  length=self._label_length,
+                                                  with_ellipsis=False))
 
         self.activity, self.duration = None, None
 
@@ -252,24 +264,37 @@ class HamsterIndicator(HamsterApplet):
                                stuff.format_duration(duration, False))
             self.set_activity_text(last_activity_name,
                                  stuff.format_duration(duration, False))
-            indicator_label = "%s %s" % (self._clamp_text(self.activity),
+            indicator_label = "%s %s" % (self._clamp_text(self.activity,
+                                         length=self._label_length,
+                                         with_ellipsis=False),
                                          self.duration)
         else:
             self._set_activity_status(0)
             label = "%s" % _(u"New activity")#_(u"No activity")
             self.set_activity_text(label, None)
-            indicator_label = _(u"No activity")
+            indicator_label = self._clamp_text(_(u"No activity"),
+                                               length=self._label_length,
+                                               with_ellipsis=False)
 
-        self.indicator.set_label(indicator_label)
+        # Update the indicator label, if needed
+        if self._show_label:
+            self.indicator.set_label(indicator_label)
+        else:
+            self.indicator.set_label("")
 
         # Update the menu or the new activity text won't show up
         self.refresh_menu()
 
-    def _clamp_text(self, text, length=25):
+    def _clamp_text(self, text, length=25, with_ellipsis=True, is_indicator=False):
         text = stuff.escape_pango(text)
         if len(text) > length:  #ellipsize at some random length
-            #text = "%s%s" % (text[:25], "&#8230;")
-            text = "%s" % (text[:length])
+            if with_ellipsis:
+                if is_indicator:
+                    text = "%s%s" % (text[:length], "...")
+                else:
+                    text = "%s%s" % (text[:length], "&#8230;")
+            else:
+                text = "%s" % (text[:length])
         return text
 
     def _set_activity_status(self, is_active):
@@ -291,6 +316,20 @@ class HamsterIndicator(HamsterApplet):
     def _on_icon_glow_changed(self, client, connection_id, entry, *args):
         self._use_icon_glow = self._settings.get_bool(self.BASE_KEY + "/icon_glow")
         self._set_attention_icon()
+
+    def _on_show_label_changed(self, client, connection_id, entry, *args):
+        '''Hide or show the indicator's label'''
+        self._show_label = self._settings.get_bool(self._show_label_path)
+        if self._show_label:
+            self.update_label()
+        else:
+            self.indicator.set_label("")
+
+    def _on_label_length_changed(self, client, connection_id, entry, *args):
+        '''Resize the indicator's label'''
+        self._label_length = self._settings.get_int(self._label_length_path)
+        if self._show_label:
+            self.update_label()
 
     def position_popup(self):
         '''Override the superclass method and do nothing'''
