@@ -7,22 +7,22 @@
 # This program is largely based on applet.py from the Hamster project.
 #
 #
-# This program is free software: you can redistribute it and/or modify it 
+# This program is free software: you can redistribute it and/or modify it
 # under the terms of either or both of the following licenses:
 #
-# 1) the GNU Lesser General Public License version 3, as published by the 
+# 1) the GNU Lesser General Public License version 3, as published by the
 # Free Software Foundation; and/or
-# 2) the GNU Lesser General Public License version 2.1, as published by 
+# 2) the GNU Lesser General Public License version 2.1, as published by
 # the Free Software Foundation.
 #
-# This program is distributed in the hope that it will be useful, but 
-# WITHOUT ANY WARRANTY; without even the implied warranties of 
-# MERCHANTABILITY, SATISFACTORY QUALITY or FITNESS FOR A PARTICULAR 
-# PURPOSE.  See the applicable version of the GNU Lesser General Public 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranties of
+# MERCHANTABILITY, SATISFACTORY QUALITY or FITNESS FOR A PARTICULAR
+# PURPOSE.  See the applicable version of the GNU Lesser General Public
 # License for more details.
 #
-# You should have received a copy of both the GNU Lesser General Public 
-# License version 3 and version 2.1 along with this program.  If not, see 
+# You should have received a copy of both the GNU Lesser General Public
+# License version 3 and version 2.1 along with this program.  If not, see
 # <http://www.gnu.org/licenses/>
 #
 
@@ -90,20 +90,17 @@ class HamsterIndicator(HamsterApplet):
         self._activity_as_attribute = None
         # Create a fake applet since HamsterApplet requires one
         applet = FakeApplet()
-        
+
         self.indicator = appindicator.Indicator ("hamster-applet",
                                   "hamster-applet-inactive",
                                   appindicator.CATEGORY_SYSTEM_SERVICES)
-    #                              appindicator.CATEGORY_APPLICATION_STATUS)
-
 
         self.indicator.set_status (appindicator.STATUS_ACTIVE)
         self.indicator.set_attention_icon('hamster-applet-active')
 
         self.activity, self.duration = None, None
-        
-        self.menu = gtk.Menu()
 
+        self.menu = gtk.Menu()
         self.activity_item = gtk.MenuItem("Fixing hamster  00:24")
         self.menu.append(self.activity_item)
         # this is where you would connect your menu item up with a function:
@@ -202,9 +199,7 @@ class HamsterIndicator(HamsterApplet):
         label = self.activity
         if self.duration:
             label = "%s %s" % (self.activity, self.duration)
- 
         label = '<span gravity="south">%s</span>' % label
-        
         if self.activity_label:
             self.activity_label.set_markup("") #clear - seems to fix the warning
             self.activity_label.set_markup(label)
