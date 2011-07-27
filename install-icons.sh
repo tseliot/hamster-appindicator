@@ -11,14 +11,8 @@ install_icon() {
     xdg-icon-resource install --theme "$theme" --novendor --size 24 "$file" "$name"
 }
 
-# Inactive icons for ubuntu-mono-light and ubuntu-mono-dark
-install_icon icons/hamster-applet-inactive-dark.png hamster-applet-inactive ubuntu-mono-light
-install_icon icons/hamster-applet-inactive-light.png hamster-applet-inactive ubuntu-mono-dark
-
-# Active icons for ubuntu-mono-light and ubuntu-mono-dark
-install_icon icons/hamster-applet-active-dark.png hamster-applet-active ubuntu-mono-light
-install_icon icons/hamster-applet-active-light.png hamster-applet-active ubuntu-mono-dark
-
-# Active icons for the hicolor theme
-install_icon icons/hamster-applet-active.png hamster-applet-active hicolor
-install_icon icons/hamster-applet-inactive.png hamster-applet-inactive hicolor
+# Install icons for hicolor ubuntu-mono-light and ubuntu-mono-dark
+for theme in hicoloro ubuntu-mono-light ubuntu-mono-dark; do
+    install_icon data/icons/$theme/24x24/hamster-applet-active.png hamster-applet-active $theme
+    install_icon data/icons/$theme/24x24/hamster-applet-inactive.png hamster-applet-inactive $theme
+done
