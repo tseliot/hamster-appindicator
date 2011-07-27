@@ -119,15 +119,13 @@ class HamsterIndicator(HamsterApplet):
         # Set the attention icon as per the icon_glow gconf key
         self._set_attention_icon()
 
-        # Initialise the activity label
-        self.indicator.set_label(self._clamp_text(_(u"No activity"),
-                                                  length=self._label_length,
-                                                  with_ellipsis=False))
+        # Initialise the activity label with "No Activity"
+        self.indicator.set_label(self._get_no_activity_label())
 
         self.activity, self.duration = None, None
 
         self.menu = gtk.Menu()
-        self.activity_item = gtk.MenuItem("Fixing hamster  00:24")
+        self.activity_item = gtk.MenuItem("")
         self.menu.append(self.activity_item)
         # this is where you would connect your menu item up with a function:
         self.activity_item.connect("activate", self.on_new_activity_activated, None)
@@ -270,11 +268,9 @@ class HamsterIndicator(HamsterApplet):
                                          self.duration)
         else:
             self._set_activity_status(0)
-            label = "%s" % _(u"New activity")#_(u"No activity")
+            label = "%s" % _(u"New activity")
             self.set_activity_text(label, None)
-            indicator_label = self._clamp_text(_(u"No activity"),
-                                               length=self._label_length,
-                                               with_ellipsis=False)
+            indicator_label = self._get_no_activity_label()
 
         # Update the indicator label, if needed
         if self._show_label:
@@ -330,6 +326,12 @@ class HamsterIndicator(HamsterApplet):
         self._label_length = self._settings.get_int(self._label_length_path)
         if self._show_label:
             self.update_label()
+
+    def _get_no_activity_label(self):
+        '''Get the indicator label set to "No activity"'''
+        return self._clamp_text(_(u"No activity"),
+                                length=self._label_length,
+                                with_ellipsis=False)
 
     def position_popup(self):
         '''Override the superclass method and do nothing'''
