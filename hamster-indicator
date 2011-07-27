@@ -29,9 +29,11 @@
 import gobject
 import gtk
 import appindicator
+import gconf
 
 import logging
 import datetime as dt
+import os.path
 
 import pygtk
 pygtk.require("2.0")
@@ -85,8 +87,16 @@ class FakeApplet(object):
 
 
 class HamsterIndicator(HamsterApplet):
-
+    BASE_KEY = "/apps/hamster-indicator"
     def __init__(self, applet=None):
+        # Gconf settings
+        self._settings = gconf.client_get_default()
+        self._settings.add_dir(self.BASE_KEY, gconf.CLIENT_PRELOAD_NONE)
+        # Key to enable/disable icon glow
+        self._icon_glow_path = os.path.join(self.BASE_KEY, "icon_glow")
+        self._use_icon_glow = self._settings.get_bool(self._icon_glow_path)
+        self._settings.notify_add(self._icon_glow_path, self._on_icon_glow_changed)
+
         self._activity_as_attribute = None
         # Create a fake applet since HamsterApplet requires one
         applet = FakeApplet()
@@ -96,7 +106,8 @@ class HamsterIndicator(HamsterApplet):
                                   appindicator.CATEGORY_SYSTEM_SERVICES)
 
         self.indicator.set_status (appindicator.STATUS_ACTIVE)
-        self.indicator.set_attention_icon('hamster-applet-active')
+        # Set the attention icon as per the icon_glow gconf key
+        self._set_attention_icon()
 
         self.activity, self.duration = None, None
 
@@ -254,6 +265,17 @@ class HamsterIndicator(HamsterApplet):
             # There's no active task
             self.indicator.set_status (appindicator.STATUS_ACTIVE)
         self.stop_activity_item.set_sensitive(is_active)
+
+    def _set_attention_icon(self):
+        '''Set the attention icon as per the gconf key'''
+        if self._use_icon_glow:
+            self.indicator.set_attention_icon('hamster-applet-active')
+        else:
+            self.indicator.set_attention_icon('hamster-applet-inactive')
+
+    def _on_icon_glow_changed(self, client, connection_id, entry, *args):
+        self._use_icon_glow = self._settings.get_bool(self.BASE_KEY + "/icon_glow")
+        self._set_attention_icon()
 
     def position_popup(self):
         '''Override the superclass method and do nothing'''
