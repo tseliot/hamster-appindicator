@@ -12,7 +12,7 @@ install_icon() {
 }
 
 # Install icons for hicolor ubuntu-mono-light and ubuntu-mono-dark
-for theme in hicoloro ubuntu-mono-light ubuntu-mono-dark; do
+for theme in hicolor ubuntu-mono-light ubuntu-mono-dark; do
     install_icon data/icons/$theme/24x24/hamster-applet-active.png hamster-applet-active $theme
     install_icon data/icons/$theme/24x24/hamster-applet-inactive.png hamster-applet-inactive $theme
 done
